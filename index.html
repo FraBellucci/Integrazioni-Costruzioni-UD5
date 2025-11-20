@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UD5 - POS Check: Audit Documentale</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 3px solid #3b82f6;
+            padding-bottom: 20px;
+        }
+
+        h1 {
+            color: #1e293b;
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .scenario-box {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            border-left: 5px solid #3b82f6;
+            padding: 25px;
+            margin-bottom: 30px;
+            border-radius: 12px;
+        }
+
+        .scenario-box h2 {
+            color: #1e40af;
+            font-size: 1.4em;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .scenario-details {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 15px;
+            line-height: 1.6;
+        }
+
+        .scenario-details strong {
+            color: #1e40af;
+        }
+
+        .cantiere-info {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .info-item {
+            display: flex;
+            gap: 10px;
+        }
+
+        .info-label {
+            font-weight: bold;
+            color: #1e40af;
+            min-width: 140px;
+        }
+
+        .instructions {
+            background: #fef3c7;
+            border-left: 5px solid #f59e0b;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 8px;
+        }
+
+        .instructions h3 {
+            color: #92400e;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        .instructions p {
+            color: #78350f;
+            line-height: 1.6;
+        }
+
+        .timer-section {
+            background: #1e293b;
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        .timer-item {
+            text-align: center;
+        }
+
+        .timer-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #60a5fa;
+        }
+
+        .timer-label {
+            font-size: 0.9em;
+            color: #94a3b8;
+            margin-top: 5px;
+        }
+
+        .pos-document {
+            background: #f8fafc;
+            border: 2px solid #cbd5e0;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .pos-section {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #3b82f6;
+            position: relative;
+        }
+
+        .pos-section-title {
+            font-weight: bold;
+            color: #1e40af;
+            font-size: 1.1em;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .pos-field {
+            display: flex;
+            margin-bottom: 12px;
+            padding: 10px;
+            background: #f8fafc;
+            border-radius: 4px;
+            position: relative;
+        }
+
+        .pos-field-label {
+            font-weight: bold;
+            min-width: 200px;
+            color: #475569;
+        }
+
+        .pos-field-value {
+            color: #1e293b;
+        }
+
+        .error-indicator {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1.2em;
+        }
+
+        .error-indicator.clickable {
+            background: #fee2e2;
+            border: 2px solid #ef4444;
+        }
+
+        .error-indicator.clickable:hover {
+            transform: translateY(-50%) scale(1.1);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+
+        .error-indicator.selected {
+            background: #ef4444;
+            color: white;
+        }
+
+        .error-indicator.correct {
+            background: #dcfce7;
+            border: 2px solid #22c55e;
+        }
+
+        .error-indicator.incorrect {
+            background: #fef2f2;
+            border: 2px solid #ef4444;
+        }
+
+        .pos-field.has-error {
+            background: #fef2f2;
+            border: 2px solid #ef4444;
+            border-radius: 6px;
+        }
+
+        .submit-section {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 2px solid #e5e7eb;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            border: none;
+            padding: 18px 60px;
+            font-size: 1.2em;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+        }
+
+        .submit-btn:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(59, 130, 246, 0.4);
+        }
+
+        .submit-btn:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .feedback {
+            display: none;
+            margin-top: 30px;
+            padding: 30px;
+            border-radius: 12px;
+            animation: slideIn 0.5s;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .feedback.show {
+            display: block;
+        }
+
+        .feedback.excellent {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            border: 3px solid #10b981;
+        }
+
+        .feedback.good {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border: 3px solid #f59e0b;
+        }
+
+        .feedback.poor {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            border: 3px solid #ef4444;
+        }
+
+        .feedback-title {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .feedback-score {
+            font-size: 2.5em;
+            font-weight: bold;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .error-list {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .error-item {
+            padding: 15px;
+            margin-bottom: 12px;
+            border-radius: 8px;
+            border-left: 4px solid #ef4444;
+            background: #fef2f2;
+        }
+
+        .error-item.missed {
+            border-left-color: #f59e0b;
+            background: #fffbeb;
+        }
+
+        .error-item.correct {
+            border-left-color: #10b981;
+            background: #f0fdf4;
+        }
+
+        .error-explanation {
+            margin-top: 10px;
+            padding: 10px;
+            background: white;
+            border-radius: 4px;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+
+        .error-explanation strong {
+            color: #991b1b;
+        }
+
+        @media (max-width: 1024px) {
+            .cantiere-info {
+                grid-template-columns: 1fr;
+            }
+
+            .pos-field {
+                flex-direction: column;
+            }
+
+            .pos-field-label {
+                margin-bottom: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📋 UD5 - POS Check: Audit Documentale</h1>
+            <p style="color: #64748b; margin-top: 10px;">Individua gli errori nel Piano Operativo di Sicurezza</p>
+        </header>
+
+        <div class="scenario-box">
+            <h2>🏗️ Scenario</h2>
+            <div class="scenario-details">
+                <p>Sei il <strong>Coordinatore per la Sicurezza in Esecuzione (CSE)</strong> e devi validare il POS presentato dall'impresa <strong>EdilCostruzioni S.r.l.</strong> prima di autorizzare l'accesso al cantiere.</p>
+                
+                <div class="cantiere-info">
+                    <div class="info-item">
+                        <span class="info-label">📍 Cantiere:</span>
+                        <span>Ristrutturazione edificio civile</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">📅 Data POS:</span>
+                        <span>15/11/2025</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">⏱️ Durata lavori:</span>
+                        <span>90 giorni</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">👷 Personale:</span>
+                        <span>8 operai + 1 preposto</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="instructions">
+            <h3>🎯 Il tuo compito</h3>
+            <p>
+                Il POS contiene <strong>esattamente 12 errori</strong> distribuiti nelle varie sezioni. 
+                Alcuni sono <strong>errori gravi</strong> (dati mancanti, scadenze superate, non conformità normative), 
+                altri sono <strong>incongruenze</strong> (date incompatibili, riferimenti errati).
+            </p>
+            <p style="margin-top: 10px;">
+                <strong>Clicca sul simbolo 🔴</strong> accanto ai campi che ritieni errati. 
+                Puoi selezionare più errori prima di inviare la verifica.
+            </p>
+        </div>
+
+        <div class="timer-section">
+            <div class="timer-item">
+                <div class="timer-value" id="errorsFound">0</div>
+                <div class="timer-label">Errori individuati</div>
+            </div>
+            <div class="timer-item">
+                <div class="timer-value">12</div>
+                <div class="timer-label">Errori totali</div>
+            </div>
+            <div class="timer-item">
+                <div class="timer-value" id="timeElapsed">00:00</div>
+                <div class="timer-label">Tempo trascorso</div>
+            </div>
+        </div>
+
+        <div class="pos-document" id="posDocument">
+            <!-- Documento POS generato dinamicamente -->
+        </div>
+
+        <div class="submit-section">
+            <button class="submit-btn" id="submitBtn">✓ Verifica POS</button>
+        </div>
+
+        <div class="feedback" id="feedback">
+            <!-- Feedback generato dinamicamente -->
+        </div>
+    </div>
+
+    <script>
+        const posData = {
+            anagrafica: {
+                title: '1. DATI IDENTIFICATIVI DEL CANTIERE',
+                fields: [
+                    { label: 'Impresa esecutrice:', value: 'EdilCostruzioni S.r.l.', error: false },
+                    { label: 'P.IVA:', value: '12345678901', error: false },
+                    { label: 'Data redazione POS:', value: '15/11/2025', error: false },
+                    { label: 'Validità POS:', value: '15/11/2024 - 15/02/2025', error: true, 
+                      explanation: 'La data di inizio validità (15/11/2024) è PRECEDENTE alla data di redazione del POS (15/11/2025). Impossibile che il documento sia valido prima di essere stato redatto!' },
+                    { label: 'Committente:', value: 'Comune di Roma', error: false },
+                    { label: 'Indirizzo cantiere:', value: 'Via Roma 25, Roma (RM)', error: false }
+                ]
+            },
+            personale: {
+                title: '2. ORGANIGRAMMA DELLA SICUREZZA',
+                fields: [
+                    { label: 'Datore di Lavoro:', value: 'Mario Rossi', error: false },
+                    { label: 'RSPP:', value: 'Ing. Laura Bianchi (esterno)', error: false },
+                    { label: 'Medico Competente:', value: 'Dr. Paolo Verdi', error: false },
+                    { label: 'Data ultima visita MC:', value: '10/03/2023', error: true,
+                      explanation: 'La sorveglianza sanitaria deve essere ANNUALE. L\'ultima visita risale a oltre 2 anni fa (marzo 2023), quindi è scaduta. Gli operatori non possono lavorare senza idoneità sanitaria valida.' },
+                    { label: 'Preposto di cantiere:', value: 'Luca Neri', error: false },
+                    { label: 'Corso preposto (art.37):', value: '12 ore - scad. 15/01/2026', error: false },
+                    { label: 'RLS:', value: 'Giulia Gialli', error: false }
+                ]
+            },
+            lavorazioni: {
+                title: '3. FASI LAVORATIVE E RISCHI',
+                fields: [
+                    { label: 'Fase 1:', value: 'Demolizione tramezzi interni', error: false },
+                    { label: 'Durata Fase 1:', value: '15 giorni (20/11/2025 - 05/12/2025)', error: false },
+                    { label: 'DPI Fase 1:', value: 'Casco, guanti, scarpe S3, maschera FP2', error: true,
+                      explanation: 'Errore grave: le maschere FP2 NON ESISTONO. La norma corretta è FFP2 (Filtering Face Piece). Questo indica scarsa conoscenza dei DPI da parte del redattore del POS.' },
+                    { label: 'Fase 2:', value: 'Rifacimento impianto elettrico', error: false },
+                    { label: 'Durata Fase 2:', value: '20 giorni (01/12/2025 - 20/12/2025)', error: true,
+                      explanation: 'SOVRAPPOSIZIONE TEMPORALE: la Fase 2 inizia il 01/12/2025 ma la Fase 1 termina il 05/12/2025. Ci sono 5 giorni di interferenza tra demolizioni e lavori elettrici NON gestita nel POS!' },
+                    { label: 'Operatore abilitato PES:', value: 'Marco Blu - PAV', error: true,
+                      explanation: 'ERRORE CRITICO: Marco Blu è indicato come operatore abilitato ma la qualifica riportata è PAV (Persona Avvertita) che NON può lavorare sotto tensione. Serve un PES (Persona ESperta) secondo CEI 11-27.' }
+                ]
+            },
+            macchine: {
+                title: '4. MACCHINE E ATTREZZATURE',
+                fields: [
+                    { label: 'Escavatore JCB mod. 8025:', value: 'Libretto presente, verifica INAIL 05/2024', error: false },
+                    { label: 'Operatore escavatore:', value: 'Giuseppe Viola', error: false },
+                    { label: 'Patentino escavatore:', value: 'Scad. 15/10/2025', error: true,
+                      explanation: 'Il patentino è SCADUTO (15/10/2025) rispetto alla data di inizio lavori (20/11/2025). L\'operatore non può condurre l\'escavatore senza abilitazione valida!' },
+                    { label: 'Trabattello mod. Facal:', value: 'Conforme UNI EN 1004, h max 8 m', error: false },
+                    { label: 'Ponteggio metallico:', value: 'Autorizzazione Ministeriale n. 123/1998', error: false },
+                    { label: 'Verifica montaggio:', value: 'Responsabile tecnico da designare', error: true,
+                      explanation: 'Il responsabile del montaggio ponteggio deve essere NOMINATO PRIMA dell\'avvio lavori, non "da designare". Il POS non può contenere dati incompleti o da definire!' }
+                ]
+            },
+            sostanze: {
+                title: '5. SOSTANZE PERICOLOSE',
+                fields: [
+                    { label: 'Vernice acrilica:', value: 'Scheda sicurezza allegata, GHS02-GHS07', error: false },
+                    { label: 'DPI vernice:', value: 'Guanti nitrile, maschera A2P2, occhiali', error: false },
+                    { label: 'Solvente per pulizia:', value: 'Acetone puro 99%', error: false },
+                    { label: 'Smaltimento solvente:', value: 'Scarico in fognatura previa diluizione', error: true,
+                      explanation: 'VIOLAZIONE AMBIENTALE GRAVE: i solventi sono rifiuti pericolosi (HP3) e NON possono essere scaricati in fognatura nemmeno se diluiti. Devono essere smaltiti tramite ditta autorizzata con FIR!' },
+                    { label: 'Cemento in polvere:', value: 'CLP: GHS05 (corrosivo)', error: false },
+                    { label: 'Registro esposti silice:', value: 'Non presente (esposizione < 0,05 mg/m³)', error: true,
+                      explanation: 'Il registro esposti a silice cristallina è SEMPRE obbligatorio quando si utilizza cemento in polvere, indipendentemente dalla concentrazione stimata. Obbligo art. 243 D.Lgs. 81/2008.' }
+                ]
+            },
+            emergenze: {
+                title: '6. GESTIONE EMERGENZE',
+                fields: [
+                    { label: 'Addetti antincendio:', value: 'Giuseppe Viola, Luca Neri (8 ore, rischio medio)', error: false },
+                    { label: 'Addetti primo soccorso:', value: 'Marco Blu, Giulia Gialli (16 ore, azienda Gruppo B)', error: true,
+                      explanation: 'Azienda edile con 8 operai = Gruppo B, ma il corso primo soccorso per Gruppo B dura 12 ORE, non 16. Le 16 ore sono per il Gruppo A (oltre 5 lavoratori a rischio alto). Errore formativo!' },
+                    { label: 'Cassetta primo soccorso:', value: 'Conforme DM 388/2003, verifica mensile', error: false },
+                    { label: 'Estintori:', value: '3 x CO2 6 kg, verifica semestrale', error: false },
+                    { label: 'Punto di raccolta:', value: 'Piazzale esterno, lato nord cantiere', error: false },
+                    { label: 'Numero emergenza:', value: '112 - CUE', error: false }
+                ]
+            }
+        };
+
+        let selectedErrors = new Set();
+        let startTime = Date.now();
+        let timerInterval;
+
+        function initPOS() {
+            const container = document.getElementById('posDocument');
+            
+            Object.values(posData).forEach(section => {
+                const sectionHTML = `
+                    <div class="pos-section">
+                        <div class="pos-section-title">${section.title}</div>
+                        ${section.fields.map((field, idx) => {
+                            const fieldId = `${Object.keys(posData).find(key => posData[key] === section)}-${idx}`;
+                            return `
+                                <div class="pos-field" id="field-${fieldId}">
+                                    <span class="pos-field-label">${field.label}</span>
+                                    <span class="pos-field-value">${field.value}</span>
+                                    <div class="error-indicator clickable" id="error-${fieldId}" onclick="toggleError('${fieldId}')">
+                                        🔴
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                `;
+                container.innerHTML += sectionHTML;
+            });
+
+            startTimer();
+        }
+
+        function toggleError(fieldId) {
+            const indicator = document.getElementById(`error-${fieldId}`);
+            const field = document.getElementById(`field-${fieldId}`);
+            
+            if (selectedErrors.has(fieldId)) {
+                selectedErrors.delete(fieldId);
+                indicator.classList.remove('selected');
+                field.classList.remove('has-error');
+            } else {
+                selectedErrors.add(fieldId);
+                indicator.classList.add('selected');
+                field.classList.add('has-error');
+            }
+            
+            document.getElementById('errorsFound').textContent = selectedErrors.size;
+        }
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                const minutes = Math.floor(elapsed / 60);
+                const seconds = elapsed % 60;
+                document.getElementById('timeElapsed').textContent = 
+                    `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            }, 1000);
+        }
+
+        document.getElementById('submitBtn').addEventListener('click', function() {
+            clearInterval(timerInterval);
+            evaluatePOS();
+            this.style.display = 'none';
+            document.querySelectorAll('.error-indicator').forEach(el => {
+                el.style.pointerEvents = 'none';
+            });
+        });
+
+        function evaluatePOS() {
+            let correctlyIdentified = [];
+            let missedErrors = [];
+            let falsePositives = [];
+            
+            Object.entries(posData).forEach(([sectionKey, section]) => {
+                section.fields.forEach((field, idx) => {
+                    const fieldId = `${sectionKey}-${idx}`;
+                    const wasSelected = selectedErrors.has(fieldId);
+                    const indicator = document.getElementById(`error-${fieldId}`);
+                    
+                    if (field.error && wasSelected) {
+                        correctlyIdentified.push({ ...field, section: section.title });
+                        indicator.className = 'error-indicator correct';
+                        indicator.textContent = '✅';
+                    } else if (field.error && !wasSelected) {
+                        missedErrors.push({ ...field, section: section.title });
+                        indicator.className = 'error-indicator incorrect';
+                        indicator.textContent = '❌';
+                    } else if (!field.error && wasSelected) {
+                        falsePositives.push({ label: field.label, value: field.value, section: section.title });
+                        indicator.className = 'error-indicator incorrect';
+                        indicator.textContent = '❌';
+                    } else {
+                        indicator.className = 'error-indicator';
+                        indicator.textContent = '';
+                    }
+                });
+            });
+            
+            displayFeedback(correctlyIdentified, missedErrors, falsePositives);
+        }
+
+        function displayFeedback(correct, missed, falsePos) {
+            const feedback = document.getElementById('feedback');
+            const totalErrors = 12;
+            const score = correct.length;
+            const percentage = (score / totalErrors) * 100;
+            
+            let feedbackClass = 'poor';
+            let title = '❌ POS RESPINTO';
+            
+            if (percentage === 100 && falsePos.length === 0) {
+                feedbackClass = 'excellent';
+                title = '🎉 POS VALIDATO CON ECCELLENZA';
+            } else if (percentage >= 75) {
+                feedbackClass = 'good';
+                title = '✓ POS VALIDATO CON RISERVE';
+            }
+            
+            feedback.className = `feedback ${feedbackClass} show`;
+            
+            let html = `
+                <div class="feedback-title">${title}</div>
+                <div class="feedback-score">${score}/${totalErrors} errori identificati</div>
+                <p style="text-align: center; margin-bottom: 25px;">
+                    ${percentage === 100 && falsePos.length === 0 
+                        ? 'Ottimo lavoro! Hai identificato tutti gli errori senza falsi positivi. Il POS può essere validato.' 
+                        : 'Il POS presenta ancora criticità non identificate o segnalazioni errate.'}
+                </p>
+            `;
+            
+            if (correct.length > 0) {
+                html += '<div class="error-list"><h3 style="color: #059669; margin-bottom: 15px;">✅ Errori correttamente individuati:</h3>';
+                correct.forEach(err => {
+                    html += `
+                        <div class="error-item correct">
+                            <strong>${err.section}</strong><br>
+                            ${err.label} ${err.value}
+                            <div class="error-explanation">
+                                <strong>Motivazione:</strong> ${err.explanation}
+                            </div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+            }
+            
+            if (missed.length > 0) {
+                html += '<div class="error-list"><h3 style="color: #dc2626; margin-bottom: 15px;">❌ Errori NON individuati:</h3>';
+                missed.forEach(err => {
+                    html += `
+                        <div class="error-item missed">
+                            <strong>${err.section}</strong><br>
+                            ${err.label} ${err.value}
+                            <div class="error-explanation">
+                                <strong>Perché è un errore:</strong> ${err.explanation}
+                            </div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+            }
+            
+            if (falsePos.length > 0) {
+                html += '<div class="error-list"><h3 style="color: #f59e0b; margin-bottom: 15px;">⚠️ Segnalazioni errate (falsi positivi):</h3>';
+                falsePos.forEach(fp => {
+                    html += `
+                        <div class="error-item">
+                            <strong>${fp.section}</strong><br>
+                            ${fp.label} ${fp.value}
+                            <div class="error-explanation">
+                                Questo campo è corretto e non doveva essere segnalato.
+                            </div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+            }
+            
+            feedback.innerHTML = html;
+            feedback.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // Inizializza
+        initPOS();
+    </script>
+</body>
+</html>
