@@ -398,7 +398,7 @@
         <div class="instructions">
             <h3>🎯 Il tuo compito</h3>
             <p>
-                Il POS contiene <strong>esattamente 12 errori</strong> distribuiti nelle varie sezioni. 
+                Il POS contiene <strong>esattamente 11 errori</strong> distribuiti nelle varie sezioni. 
                 Alcuni sono <strong>errori gravi</strong> (dati mancanti, scadenze superate, non conformità normative), 
                 altri sono <strong>incongruenze</strong> (date incompatibili, riferimenti errati).
             </p>
@@ -467,7 +467,8 @@
                 title: '3. FASI LAVORATIVE E RISCHI',
                 fields: [
                     { label: 'Fase 1:', value: 'Demolizione tramezzi interni', error: false },
-                    { label: 'Durata Fase 1:', value: '15 giorni (20/11/2025 - 05/12/2025)', error: false },
+                   { label: 'Durata Fase 1:', value: '15 giorni (20/11/2025 - 05/12/2025)', error: true,
+                      explanation: 'INCONGRUENZA: dal 20/11 al 05/12 ci sono 15 giorni, ma nei cronoprogrammi edili la durata si esprime in giorni lavorativi  (escludendo sabati/domeniche). ' },
                     { label: 'DPI Fase 1:', value: 'Casco, guanti, scarpe S3, maschera FP2', error: true,
                       explanation: 'Errore grave: le maschere FP2 NON ESISTONO. La norma corretta è FFP2 (Filtering Face Piece). Questo indica scarsa conoscenza dei DPI da parte del redattore del POS.' },
                     { label: 'Fase 2:', value: 'Rifacimento impianto elettrico', error: false },
@@ -619,7 +620,7 @@
 
         function displayFeedback(correct, missed, falsePos) {
             const feedback = document.getElementById('feedback');
-            const totalErrors = 12;
+            const totalErrors = 11;
             const score = correct.length;
             const percentage = (score / totalErrors) * 100;
             
